@@ -9,9 +9,10 @@ Install npm packages
 npm install
 ```
 
-And run next command for using rg
+And run next commands for using rg
 
 ```
+chmod +x cli.js
 npm link
 ```
 
