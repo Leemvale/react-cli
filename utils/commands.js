@@ -1,4 +1,6 @@
 const fs = require('fs');
+const path = require('path');
+
 const { exec } = require('child_process');
 
 function createDirectory(dirName, componentName) {
@@ -9,45 +11,57 @@ function createDirectory(dirName, componentName) {
             }
         })
     }
-    if (!fs.existsSync(`${dirName}/${componentName}`)) {
-        exec(`mkdir ${dirName}/${componentName}`, (err) => {
+    if (!fs.existsSync(path.resolve(dirName, componentName))) {
+        exec('mkdir ' + path.resolve(dirName, componentName), (err) => {
             if(err) { throw err }
         })
     }
 }
 
-function createFiles(extensions, subDir, component, type) {
+function createFiles(extensions, subDir, componentName, type) {
+    let command;
+    switch (process.platform) {
+        case 'linux':
+            command = 'touch ';
+            break;
+        case 'win32':
+            command = 'echo > ';
+            break;
+        default:
+            throw new Error('Unsupported platform: ' + process.platform);
+    }
+
     extensions.forEach((ext) => {
-        exec('touch '+ subDir + component + ext, (err) => {
+        exec(command + path.resolve(subDir, componentName + ext), (err) => {
             if (err) { throw err }
         });
     });
     if (type === "component") {
-        exec('touch '+ subDir + "index.js", (err) => {
+        exec(command + path.resolve(subDir, "index.js"), (err) => {
             if (err) { throw err }
         });
     }
 }
 
-function createTemplate(subDir, componentName, type) {
+function createTemplates(subDir, componentName, type) {
     if (type === "component") {
-        const templateJSX= `import React from 'react';
+        const componentTemplate = `import React from 'react';
     
-function ${componentName}(props) {
+export default function ${componentName}(props) {
     return (
         <div>${componentName} works!</div>
     )
 }`;
-        fs.writeFileSync(subDir + componentName + ".js", templateJSX);
+        fs.writeFileSync(path.resolve(subDir, componentName + ".js"), componentTemplate );
 
         const templateIndex = `export default from './${componentName}.js'`;
-        fs.writeFileSync(subDir + "index.js", templateIndex);
+        fs.writeFileSync(path.resolve(subDir, "index.js"), templateIndex);
     }
 
     if (type === "container") {
-        const templateJSX = `import React, { Component } from 'react';
+        const containerTemplate = `import React, { Component } from 'react';
     
-class ${componentName} extends Component {
+export default class ${componentName} extends Component {
     componentDidMount() {
     
     }
@@ -59,8 +73,8 @@ class ${componentName} extends Component {
     }
 }`;
 
-        fs.writeFileSync(subDir + componentName + ".js", templateJSX);
+        fs.writeFileSync(path.resolve(subDir, componentName + ".js"), containerTemplate);
     }
 }
 
-module.exports = {createDirectory, createFiles, createTemplate};
+module.exports = {createDirectory, createFiles, createTemplates};
