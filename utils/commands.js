@@ -4,17 +4,11 @@ const path = require('path');
 const { exec } = require('child_process');
 
 function createDirectory(dirName, componentName) {
-    if (!fs.existsSync(dirName)) {
-        exec(`mkdir ${dirName}`, (err) => {
-            if (err) {
-                throw err
-            }
-        })
+    if (!fs.existsSync(path.resolve(dirName))) {
+        fs.mkdirSync(path.resolve(dirName))
     }
     if (!fs.existsSync(path.resolve(dirName, componentName))) {
-        exec('mkdir ' + path.resolve(dirName, componentName), (err) => {
-            if(err) { throw err }
-        })
+        fs.mkdirSync(path.resolve(dirName, componentName))
     }
 }
 
