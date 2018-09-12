@@ -19,7 +19,7 @@ function createFiles(extensions, subDir, componentName, type) {
             command = 'touch ';
             break;
         case 'win32':
-            command = 'echo > ';
+            command = 'echo.> ';
             break;
         default:
             throw new Error('Unsupported platform: ' + process.platform);
